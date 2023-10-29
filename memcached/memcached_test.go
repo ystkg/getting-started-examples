@@ -30,7 +30,7 @@ func TestNewClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	port := strings.SplitN(conf.Services.Memcached.Ports[0], ":", 2)[0]
+	port, _, _ := strings.Cut(conf.Services.Memcached.Ports[0], ":")
 	server := "localhost:" + port
 
 	client := memcached.NewClient(server)

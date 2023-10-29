@@ -30,7 +30,7 @@ func TestNewClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	port := strings.SplitN(conf.Services.Gcs.Ports[0], ":", 2)[0]
+	port, _, _ := strings.Cut(conf.Services.Gcs.Ports[0], ":")
 	url := "localhost:" + port
 	if err = os.Setenv("STORAGE_EMULATOR_HOST", url); err != nil {
 		t.Fatal(err)

@@ -30,7 +30,7 @@ func TestNewClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	port := strings.SplitN(conf.Services.Redis.Ports[0], ":", 2)[0]
+	port, _, _ := strings.Cut(conf.Services.Redis.Ports[0], ":")
 	addr := "localhost:" + port
 	rdb := redis.NewClient(addr, "", "")
 	defer rdb.Close()
