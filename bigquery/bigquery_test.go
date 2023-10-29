@@ -2,10 +2,11 @@ package bigquery_test
 
 import (
 	"context"
-	"github.com/ystkg/getting-started-examples/bigquery"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/ystkg/getting-started-examples/bigquery"
 
 	"google.golang.org/api/iterator"
 	"gopkg.in/yaml.v3"

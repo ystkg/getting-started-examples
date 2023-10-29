@@ -3,10 +3,11 @@ package postgres_test
 import (
 	"context"
 	"fmt"
-	"github.com/ystkg/getting-started-examples/postgres"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/ystkg/getting-started-examples/postgres"
 
 	"gopkg.in/yaml.v3"
 )

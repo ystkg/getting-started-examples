@@ -2,10 +2,11 @@ package mariadb_test
 
 import (
 	"fmt"
-	"github.com/ystkg/getting-started-examples/mariadb"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/ystkg/getting-started-examples/mariadb"
 
 	"gopkg.in/yaml.v3"
 )

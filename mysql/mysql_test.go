@@ -2,10 +2,11 @@ package mysql_test
 
 import (
 	"fmt"
-	"github.com/ystkg/getting-started-examples/mysql"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/ystkg/getting-started-examples/mysql"
 
 	"gopkg.in/yaml.v3"
 )

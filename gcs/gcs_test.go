@@ -2,10 +2,11 @@ package gcs_test
 
 import (
 	"context"
-	"github.com/ystkg/getting-started-examples/gcs"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/ystkg/getting-started-examples/gcs"
 
 	"gopkg.in/yaml.v3"
 )

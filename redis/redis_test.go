@@ -2,10 +2,11 @@ package redis_test
 
 import (
 	"context"
-	"github.com/ystkg/getting-started-examples/redis"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/ystkg/getting-started-examples/redis"
 
 	"gopkg.in/yaml.v3"
 )

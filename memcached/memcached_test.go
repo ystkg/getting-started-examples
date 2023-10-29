@@ -1,10 +1,11 @@
 package memcached_test
 
 import (
-	"github.com/ystkg/getting-started-examples/memcached"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/ystkg/getting-started-examples/memcached"
 
 	"github.com/bradfitz/gomemcache/memcache"
 	"gopkg.in/yaml.v3"
