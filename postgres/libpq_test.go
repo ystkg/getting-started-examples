@@ -34,7 +34,7 @@ func TestNewClient(t *testing.T) {
 	}
 
 	password := conf.Services.Postgres.Environment.PostgresPassword
-	port := strings.SplitN(conf.Services.Postgres.Ports[0], ":", 2)[0]
+	port, _, _ := strings.Cut(conf.Services.Postgres.Ports[0], ":")
 	dsn := fmt.Sprintf("postgres://postgres:%s@localhost:%s/postgres?sslmode=disable", password, port)
 
 	db, err := postgres.NewClient(dsn)

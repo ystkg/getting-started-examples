@@ -36,7 +36,7 @@ func TestNewClient(t *testing.T) {
 
 	password := conf.Services.Mariadb.Environment.MariadbRootPassword
 	database := conf.Services.Mariadb.Environment.MariadbDatabase
-	port := strings.SplitN(conf.Services.Mariadb.Ports[0], ":", 2)[0]
+	port, _, _ := strings.Cut(conf.Services.Mariadb.Ports[0], ":")
 	dsn := fmt.Sprintf("root:%s@tcp(localhost:%s)/%s", password, port, database)
 
 	db, err := mariadb.NewClient(dsn)

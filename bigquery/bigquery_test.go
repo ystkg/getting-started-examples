@@ -32,7 +32,7 @@ func TestNewClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	port := strings.SplitN(conf.Services.Bigquery.Ports[0], ":", 2)[0]
+	port, _, _ := strings.Cut(conf.Services.Bigquery.Ports[0], ":")
 	url := "http://localhost:" + port
 	projectID := getValue(conf.Services.Bigquery.Command, "--project")
 	datasetID := getValue(conf.Services.Bigquery.Command, "--dataset")
@@ -54,8 +54,8 @@ func TestNewClient(t *testing.T) {
 
 func getValue(cmd, key string) string {
 	for _, v := range strings.Split(cmd, " ") {
-		if strings.HasPrefix(v, key+"=") {
-			return strings.SplitN(v, "=", 2)[1]
+		if after, found := strings.CutPrefix(v, key+"="); found {
+			return after
 		}
 	}
 	return ""

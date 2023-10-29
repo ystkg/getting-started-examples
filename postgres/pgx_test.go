@@ -23,7 +23,7 @@ func TestNewPgxClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	port := strings.SplitN(conf.Services.Postgres.Ports[0], ":", 2)[0]
+	port, _, _ := strings.Cut(conf.Services.Postgres.Ports[0], ":")
 	password := conf.Services.Postgres.Environment.PostgresPassword
 	dsn := fmt.Sprintf("host=localhost port=%s user=postgres password=%s dbname=postgres sslmode=disable TimeZone=Asia/Tokyo", port, password)
 

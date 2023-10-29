@@ -46,7 +46,7 @@ func TestNewClient(t *testing.T) {
 	*/
 	password := conf.Services.Mysql.Environment.MysqlRootPassword
 	database := conf.Services.Mysql.Environment.MysqlDatabase
-	port := strings.SplitN(conf.Services.Mysql.Ports[0], ":", 2)[0]
+	port, _, _ := strings.Cut(conf.Services.Mysql.Ports[0], ":")
 	dsn := fmt.Sprintf("root:%s@tcp(localhost:%s)/%s", password, port, database)
 
 	db, err := mysql.NewClient(dsn)
