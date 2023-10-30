@@ -2,7 +2,7 @@
 
 | Cloud | Dockerイメージ | ポート | パッケージ |
 | --- | --- | ---: | --- |
-| PostgreSQL | postgres | 5432　| github.com/lib/pq<br>github.com/jackc/pgx/v5 |
+| PostgreSQL | postgres | 5432 | github.com/lib/pq<br>github.com/jackc/pgx/v5 |
 | MySQL | mysql | 3306 | github.com/go-sql-driver/mysql |
 | MariaDB | mariadb | 3307 | github.com/go-sql-driver/mysql |
 | Redis | redis | 6379 | github.com/redis/go-redis/v9 |
