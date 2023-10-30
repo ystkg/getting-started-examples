@@ -1,6 +1,6 @@
 # ローカル開発環境
 
-| Cloud | Dockerイメージ | ポート | パッケージ |
+| Cloud | Dockerイメージ | Port | パッケージ |
 | --- | --- | ---: | --- |
 | PostgreSQL | postgres | 5432 | github.com/lib/pq<br>github.com/jackc/pgx/v5 |
 | MySQL | mysql | 3306 | github.com/go-sql-driver/mysql |
