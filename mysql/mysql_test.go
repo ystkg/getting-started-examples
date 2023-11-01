@@ -1,10 +1,12 @@
 package mysql_test
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ystkg/getting-started-examples/mysql"
 
@@ -23,7 +25,7 @@ type DockerCompose struct {
 	}
 }
 
-func TestNewClient(t *testing.T) {
+func TestConnect(t *testing.T) {
 	buf, err := os.ReadFile("../docker-compose.yml")
 	if err != nil {
 		t.Fatal(err)
@@ -55,7 +57,10 @@ func TestNewClient(t *testing.T) {
 	}
 	defer db.Close()
 
-	if err = db.Ping(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err = db.PingContext(ctx); err != nil {
 		t.Fatal(err)
 	}
 }

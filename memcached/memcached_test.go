@@ -4,10 +4,10 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ystkg/getting-started-examples/memcached"
 
-	"github.com/bradfitz/gomemcache/memcache"
 	"gopkg.in/yaml.v3"
 )
 
@@ -19,7 +19,7 @@ type DockerCompose struct {
 	}
 }
 
-func TestNewClient(t *testing.T) {
+func TestConnect(t *testing.T) {
 	buf, err := os.ReadFile("../docker-compose.yml")
 	if err != nil {
 		t.Fatal(err)
@@ -33,19 +33,20 @@ func TestNewClient(t *testing.T) {
 	port, _, _ := strings.Cut(conf.Services.Memcached.Ports[0], ":")
 	server := "localhost:" + port
 
-	client := memcached.NewClient(server)
+	client := memcached.NewMemcached(server, 5*time.Second)
+	defer client.Close()
 
 	const want = "val1"
-	if err = client.Set(&memcache.Item{Key: "key1", Value: []byte(want)}); err != nil {
+	if err = client.SetString("key1", want, 0); err != nil {
 		t.Fatal(err)
 	}
 
-	item, err := client.Get("key1")
+	val, err := client.Get("key1")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	got := string(item.Value)
+	got := string(val)
 	if got != want {
 		t.Errorf("%s, want %s", got, want)
 	}

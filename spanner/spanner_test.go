@@ -6,15 +6,9 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
-	"cloud.google.com/go/spanner"
-	database "cloud.google.com/go/spanner/admin/database/apiv1"
-	"cloud.google.com/go/spanner/admin/database/apiv1/databasepb"
-	instanceadmin "cloud.google.com/go/spanner/admin/instance/apiv1"
-	"cloud.google.com/go/spanner/admin/instance/apiv1/instancepb"
-	sut "github.com/ystkg/getting-started-examples/spanner"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"github.com/ystkg/getting-started-examples/spanner"
 	"gopkg.in/yaml.v3"
 )
 
@@ -26,7 +20,7 @@ type DockerCompose struct {
 	}
 }
 
-func TestNewClient(t *testing.T) {
+func TestConnect(t *testing.T) {
 	buf, err := os.ReadFile("../docker-compose.yml")
 	if err != nil {
 		t.Fatal(err)
@@ -46,55 +40,29 @@ func TestNewClient(t *testing.T) {
 	const instanceID = "instance1"
 	const databaseID = "database1"
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	admin, err := instanceadmin.NewInstanceAdminClient(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer admin.Close()
-	op, err := admin.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
-		Parent:     fmt.Sprintf("projects/%s", projectID),
-		InstanceId: instanceID,
-	})
-	if err == nil {
-		if _, err = op.Wait(ctx); err != nil {
-			t.Fatal(err)
-		}
-	} else if status.Code(err) != codes.AlreadyExists {
+	if err := spanner.CreateInstance(ctx, projectID, instanceID); err != nil {
 		t.Fatal(err)
 	}
 
-	dbadmin, err := database.NewDatabaseAdminClient(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer dbadmin.Close()
-	dbop, err := dbadmin.CreateDatabase(ctx, &databasepb.CreateDatabaseRequest{
-		Parent:          fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
-		CreateStatement: "CREATE DATABASE " + databaseID,
-	})
-	if err == nil {
-		if _, err = dbop.Wait(ctx); err != nil {
-			t.Fatal(err)
-		}
-	} else if status.Code(err) != codes.AlreadyExists {
+	if err := spanner.CreateDatabase(ctx, projectID, instanceID, databaseID); err != nil {
 		t.Fatal(err)
 	}
 
 	db := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID)
-	client, err := sut.NewClient(db)
+	client, err := spanner.NewSpanner(ctx, db)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer client.Close()
 
 	const want = 1
-	stmt := spanner.Statement{SQL: fmt.Sprintf("SELECT %d", want)}
-	iter := client.Single().Query(ctx, stmt)
-	defer iter.Stop()
+	it := client.SingleQuery(ctx, fmt.Sprintf("SELECT %d", want))
+	defer it.Stop()
 
-	row, err := iter.Next()
+	row, err := it.Next()
 	if err != nil {
 		t.Fatal(err)
 	}

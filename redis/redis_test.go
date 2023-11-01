@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ystkg/getting-started-examples/redis"
 
@@ -19,7 +20,7 @@ type DockerCompose struct {
 	}
 }
 
-func TestNewClient(t *testing.T) {
+func TestConnect(t *testing.T) {
 	buf, err := os.ReadFile("../docker-compose.yml")
 	if err != nil {
 		t.Fatal(err)
@@ -32,17 +33,18 @@ func TestNewClient(t *testing.T) {
 
 	port, _, _ := strings.Cut(conf.Services.Redis.Ports[0], ":")
 	addr := "localhost:" + port
-	rdb := redis.NewClient(addr, "", "")
-	defer rdb.Close()
+	client := redis.NewRedis(addr, "", "")
+	defer client.Close()
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	const want = "val1"
-	if err = rdb.Set(ctx, "key1", want, 0).Err(); err != nil {
+	if err = client.Set(ctx, "key1", want, 0); err != nil {
 		t.Fatal(err)
 	}
 
-	got, err := rdb.Get(ctx, "key1").Result()
+	got, err := client.Get(ctx, "key1")
 	if err != nil {
 		t.Fatal(err)
 	}
