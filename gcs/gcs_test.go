@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ystkg/getting-started-examples/gcs"
 
@@ -19,7 +20,11 @@ type DockerCompose struct {
 	}
 }
 
-func TestNewClient(t *testing.T) {
+func TestMain(m *testing.M) {
+	m.Run()
+}
+
+func TestConnect(t *testing.T) {
 	buf, err := os.ReadFile("../docker-compose.yml")
 	if err != nil {
 		t.Fatal(err)
@@ -35,17 +40,26 @@ func TestNewClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	client, err := gcs.NewClient()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	gcs, err := gcs.NewGcs(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer client.Close()
-
-	ctx := context.Background()
+	defer gcs.Close()
 
 	const projectID = "local-gcs-20231029"
-	client.Bucket("bucket1").Delete(ctx)
-	if err := client.Bucket("bucket1").Create(ctx, projectID, nil); err != nil {
+	const bucketName = "bucket1"
+
+	exists, err := gcs.ExistsBucket(ctx, projectID, bucketName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if exists {
+		gcs.DeleteBucket(ctx, bucketName)
+	}
+	if err := gcs.CreateBucket(ctx, projectID, bucketName); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -6,13 +6,14 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ystkg/getting-started-examples/postgres"
 
 	"gopkg.in/yaml.v3"
 )
 
-func TestNewPgxClient(t *testing.T) {
+func TestConnectPgx(t *testing.T) {
 	buf, err := os.ReadFile("../docker-compose.yml")
 	if err != nil {
 		t.Fatal(err)
@@ -27,7 +28,8 @@ func TestNewPgxClient(t *testing.T) {
 	password := conf.Services.Postgres.Environment.PostgresPassword
 	dsn := fmt.Sprintf("host=localhost port=%s user=postgres password=%s dbname=postgres sslmode=disable TimeZone=Asia/Tokyo", port, password)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	conn, err := postgres.NewPgxClient(dsn)
 	if err != nil {
