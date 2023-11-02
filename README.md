@@ -19,6 +19,25 @@
 
 ### Cloud Storage
 
+#### バケット
+
+| 操作 | メソッド名 | パラメータ |
+| --- | --- | --- |
+|作成|CreateBucket|projectID, name|
+|削除|DeleteBucket|name|
+|存在確認|ExistsBucket|projectID, name|
+|一覧|ListBuckets|projectID|
+
+#### オブジェクト
+
+| 操作 | メソッド名 | パラメータ |
+| --- | --- | --- |
+|書き込み|Write|bucket, name, contentType, bytes|
+|読み込み|Read|bucket, name|
+|削除|Delete|bucket, name|
+|存在確認|Exists|bucket, name|
+|一覧|List|bucket, prefix|
+
 ## NewSQL
 
 ### Cloud Spanner
