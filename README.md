@@ -10,3 +10,16 @@
 | BigQuery | ghcr.io/goccy/bigquery-emulator | 9050 | cloud.google.com/go/bigquery |
 | Cloud Storage | fsouza/fake-gcs-server | 4443 | cloud.google.com/go/storage |
 | Cloud Spanner | gcr.io/cloud-spanner-emulator/emulator | 9010<br>9020| cloud.google.com/go/spanner |
+
+## データウェアハウス
+
+### BigQuery
+
+## オブジェクトストレージ
+
+### Cloud Storage
+
+## NewSQL
+
+### Cloud Spanner
+
