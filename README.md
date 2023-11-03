@@ -58,3 +58,24 @@
 
 ### Cloud Spanner
 
+#### インスタンス
+
+| 操作 | メソッド名 | パラメータ |
+| --- | --- | --- |
+|作成|CreateInstance|projectID, instanceID|
+|削除|DeleteInstance|projectID, instanceID|
+|一覧|ListInstances|projectID|
+
+#### データベース
+
+| 操作 | メソッド名 | パラメータ |
+| --- | --- | --- |
+|作成|CreateDatabase|projectID, instanceID, databaseID|
+|削除|DropDatabase|projectID, instanceID, databaseID|
+|一覧|ListDatabases|projectID, instanceID|
+
+#### テーブル
+
+| 操作 | メソッド名 | パラメータ |
+| --- | --- | --- |
+

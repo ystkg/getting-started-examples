@@ -43,11 +43,21 @@ func TestConnect(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := spanner.CreateInstance(ctx, projectID, instanceID); err != nil {
+	instance, err := spanner.NewInstanceAdmin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer instance.Close()
+	if err := instance.CreateInstance(ctx, projectID, instanceID); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := spanner.CreateDatabase(ctx, projectID, instanceID, databaseID); err != nil {
+	database, err := spanner.NewDatabaseAdmin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer database.Close()
+	if err := database.CreateDatabase(ctx, projectID, instanceID, databaseID); err != nil {
 		t.Fatal(err)
 	}
 
