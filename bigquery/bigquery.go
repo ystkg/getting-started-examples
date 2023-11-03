@@ -3,17 +3,17 @@ package bigquery
 import (
 	"context"
 
-	bquery "cloud.google.com/go/bigquery"
+	bigqueryapi "cloud.google.com/go/bigquery"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
 type BigQuery struct {
-	client *bquery.Client
+	client *bigqueryapi.Client
 }
 
 func NewBigQuery(ctx context.Context, projectID, url string) (*BigQuery, error) {
-	client, err := bquery.NewClient(
+	client, err := bigqueryapi.NewClient(
 		ctx,
 		projectID,
 		option.WithEndpoint(url),
@@ -27,6 +27,15 @@ func NewBigQuery(ctx context.Context, projectID, url string) (*BigQuery, error) 
 
 func (bq *BigQuery) Close() error {
 	return bq.client.Close()
+}
+
+func (bq *BigQuery) CreateDataset(ctx context.Context, datasetID string) error {
+	md := &bigqueryapi.DatasetMetadata{}
+	return bq.client.Dataset(datasetID).Create(ctx, md)
+}
+
+func (bq *BigQuery) DeleteDataset(ctx context.Context, datasetID string) error {
+	return bq.client.Dataset(datasetID).Delete(ctx)
 }
 
 func (bq *BigQuery) Datasets(ctx context.Context) ([]string, error) {
@@ -45,6 +54,17 @@ func (bq *BigQuery) Datasets(ctx context.Context) ([]string, error) {
 	}
 
 	return datasets, nil
+}
+
+func (bq *BigQuery) CreateTable(ctx context.Context, datasetID, tableID string, schema bigqueryapi.Schema) error {
+	tm := &bigqueryapi.TableMetadata{
+		Schema: schema,
+	}
+	return bq.client.Dataset(datasetID).Table(tableID).Create(ctx, tm)
+}
+
+func (bq *BigQuery) DeleteTable(ctx context.Context, datasetID, tableID string) error {
+	return bq.client.Dataset(datasetID).Table(tableID).Delete(ctx)
 }
 
 func (bq *BigQuery) Tables(ctx context.Context, datasetID string) ([]string, error) {

@@ -13,6 +13,22 @@
 
 ## データウェアハウス
 
+#### データセット
+
+| 操作 | メソッド名 | パラメータ |
+| --- | --- | --- |
+|作成|CreateDataset|datasetID|
+|削除|DeleteDataset|datasetID|
+|一覧|Datasets||
+
+#### テーブル
+
+| 操作 | メソッド名 | パラメータ |
+| --- | --- | --- |
+|作成|CreateTable|datasetID, tableID, schema|
+|削除|DeleteTable|datasetID, tableID|
+|一覧|Tables|datasetID|
+
 ### BigQuery
 
 ## オブジェクトストレージ
