@@ -13,6 +13,8 @@
 
 ## データウェアハウス
 
+### BigQuery
+
 #### データセット
 
 | 操作 | メソッド名 | パラメータ |
@@ -28,8 +30,6 @@
 |作成|CreateTable|datasetID, tableID, schema|
 |削除|DeleteTable|datasetID, tableID|
 |一覧|Tables|datasetID|
-
-### BigQuery
 
 ## オブジェクトストレージ
 
