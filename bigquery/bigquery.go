@@ -2,18 +2,20 @@ package bigquery
 
 import (
 	"context"
+	"net/http"
 
-	bquery "cloud.google.com/go/bigquery"
+	bigqueryapi "cloud.google.com/go/bigquery"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
 type BigQuery struct {
-	client *bquery.Client
+	client *bigqueryapi.Client
 }
 
 func NewBigQuery(ctx context.Context, projectID, url string) (*BigQuery, error) {
-	client, err := bquery.NewClient(
+	client, err := bigqueryapi.NewClient(
 		ctx,
 		projectID,
 		option.WithEndpoint(url),
@@ -29,22 +31,75 @@ func (bq *BigQuery) Close() error {
 	return bq.client.Close()
 }
 
+func (bq *BigQuery) CreateDataset(ctx context.Context, datasetID string) error {
+	md := &bigqueryapi.DatasetMetadata{}
+	_, err := bq.client.Dataset(datasetID).Metadata(ctx)
+	if err == nil {
+		return nil
+	}
+	if e, ok := err.(*googleapi.Error); ok {
+		if e.Code != http.StatusNotFound {
+			return err
+		}
+	}
+	return bq.client.Dataset(datasetID).Create(ctx, md)
+}
+
+func (bq *BigQuery) DeleteDataset(ctx context.Context, datasetID string) error {
+	_, err := bq.client.Dataset(datasetID).Metadata(ctx)
+	if err != nil {
+		if e, ok := err.(*googleapi.Error); ok {
+			if e.Code == http.StatusNotFound {
+				return nil
+			}
+		}
+		return err
+	}
+	return bq.client.Dataset(datasetID).Delete(ctx)
+}
+
 func (bq *BigQuery) Datasets(ctx context.Context) ([]string, error) {
 	datasets := []string{}
 
 	it := bq.client.Datasets(ctx)
 	for {
 		dataset, err := it.Next()
+		if err == iterator.Done {
+			return datasets, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			return nil, err
 		}
 		datasets = append(datasets, dataset.DatasetID)
 	}
+}
 
-	return datasets, nil
+func (bq *BigQuery) CreateTable(ctx context.Context, datasetID, tableID string, schema bigqueryapi.Schema) error {
+	_, err := bq.client.Dataset(datasetID).Table(tableID).Metadata(ctx)
+	if err == nil {
+		return nil
+	}
+	if e, ok := err.(*googleapi.Error); ok {
+		if e.Code != http.StatusNotFound {
+			return err
+		}
+	}
+	return bq.client.Dataset(datasetID).Table(tableID).Create(ctx, &bigqueryapi.TableMetadata{
+		Schema: schema,
+	})
+}
+
+func (bq *BigQuery) DeleteTable(ctx context.Context, datasetID, tableID string) error {
+	_, err := bq.client.Dataset(datasetID).Table(tableID).Metadata(ctx)
+	if err != nil {
+		if e, ok := err.(*googleapi.Error); ok {
+			if e.Code == http.StatusNotFound {
+				return nil
+			}
+		}
+		return err
+	}
+	return bq.client.Dataset(datasetID).Table(tableID).Delete(ctx)
 }
 
 func (bq *BigQuery) Tables(ctx context.Context, datasetID string) ([]string, error) {
@@ -58,14 +113,16 @@ func (bq *BigQuery) Tables(ctx context.Context, datasetID string) ([]string, err
 	it := dataset.Tables(ctx)
 	for {
 		table, err := it.Next()
+		if err == iterator.Done {
+			return tables, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			return nil, err
 		}
 		tables = append(tables, table.TableID)
 	}
+}
 
-	return tables, nil
+func (bq *BigQuery) Insert(ctx context.Context, datasetID, tableID string, items interface{}) error {
+	return bq.client.Dataset(datasetID).Table(tableID).Inserter().Put(ctx, items)
 }

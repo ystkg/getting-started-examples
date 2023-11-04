@@ -10,3 +10,74 @@
 | BigQuery | ghcr.io/goccy/bigquery-emulator | 9050 | cloud.google.com/go/bigquery |
 | Cloud Storage | fsouza/fake-gcs-server | 4443 | cloud.google.com/go/storage |
 | Cloud Spanner | gcr.io/cloud-spanner-emulator/emulator | 9010<br>9020| cloud.google.com/go/spanner |
+
+## データウェアハウス
+
+### BigQuery
+
+#### データセット
+
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | BigQuery | CreateDataset | datasetID |
+| 削除 | BigQuery | DeleteDataset | datasetID |
+| 一覧 | BigQuery | Datasets | |
+
+#### テーブル
+
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | BigQuery | CreateTable | datasetID, tableID, schema |
+| 削除 | BigQuery | DeleteTable | datasetID, tableID |
+| 一覧 | BigQuery | Tables      | datasetID |
+
+## オブジェクトストレージ
+
+### Cloud Storage
+
+#### バケット
+
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成     | Gcs | CreateBucket | projectID, name |
+| 削除     | Gcs | DeleteBucket | name |
+| 存在確認 | Gcs | ExistsBucket | projectID, name |
+| 一覧     | Gcs | Buckets      | projectID |
+
+#### オブジェクト
+
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 書き込み | Gcs | Write  | bucket, name, contentType, bytes |
+| 読み込み | Gcs | Read   | bucket, name |
+| 削除     | Gcs | Delete | bucket, name |
+| 存在確認 | Gcs | Exists | bucket, name |
+| 一覧     | Gcs | List   | bucket, prefix |
+
+## NewSQL
+
+### Cloud Spanner
+
+#### インスタンス
+
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | InstanceAdmin | Create    | projectID, instanceID |
+| 削除 | InstanceAdmin | Delete    | projectID, instanceID |
+| 一覧 | InstanceAdmin | Instances | projectID |
+
+#### データベース
+
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | DatabaseAdmin | CreateDatabase | projectID, instanceID, databaseID |
+| 削除 | DatabaseAdmin | DropDatabase   | projectID, instanceID, databaseID |
+| 一覧 | DatabaseAdmin | Databases      | projectID, instanceID |
+
+#### テーブル
+
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | DatabaseAdmin | CreateTable | projectID, instanceID, databaseID, ddl |
+| 削除 | DatabaseAdmin | DropTable   | projectID, instanceID, databaseID, name |
+| 一覧 | Spanner       | Tables      | |
