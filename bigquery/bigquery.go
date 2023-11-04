@@ -2,8 +2,10 @@ package bigquery
 
 import (
 	"context"
+	"net/http"
 
 	bigqueryapi "cloud.google.com/go/bigquery"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
@@ -31,10 +33,28 @@ func (bq *BigQuery) Close() error {
 
 func (bq *BigQuery) CreateDataset(ctx context.Context, datasetID string) error {
 	md := &bigqueryapi.DatasetMetadata{}
+	_, err := bq.client.Dataset(datasetID).Metadata(ctx)
+	if err == nil {
+		return nil
+	}
+	if e, ok := err.(*googleapi.Error); ok {
+		if e.Code != http.StatusNotFound {
+			return err
+		}
+	}
 	return bq.client.Dataset(datasetID).Create(ctx, md)
 }
 
 func (bq *BigQuery) DeleteDataset(ctx context.Context, datasetID string) error {
+	_, err := bq.client.Dataset(datasetID).Metadata(ctx)
+	if err != nil {
+		if e, ok := err.(*googleapi.Error); ok {
+			if e.Code == http.StatusNotFound {
+				return nil
+			}
+		}
+		return err
+	}
 	return bq.client.Dataset(datasetID).Delete(ctx)
 }
 
@@ -55,13 +75,30 @@ func (bq *BigQuery) Datasets(ctx context.Context) ([]string, error) {
 }
 
 func (bq *BigQuery) CreateTable(ctx context.Context, datasetID, tableID string, schema bigqueryapi.Schema) error {
-	tm := &bigqueryapi.TableMetadata{
-		Schema: schema,
+	_, err := bq.client.Dataset(datasetID).Table(tableID).Metadata(ctx)
+	if err == nil {
+		return nil
 	}
-	return bq.client.Dataset(datasetID).Table(tableID).Create(ctx, tm)
+	if e, ok := err.(*googleapi.Error); ok {
+		if e.Code != http.StatusNotFound {
+			return err
+		}
+	}
+	return bq.client.Dataset(datasetID).Table(tableID).Create(ctx, &bigqueryapi.TableMetadata{
+		Schema: schema,
+	})
 }
 
 func (bq *BigQuery) DeleteTable(ctx context.Context, datasetID, tableID string) error {
+	_, err := bq.client.Dataset(datasetID).Table(tableID).Metadata(ctx)
+	if err != nil {
+		if e, ok := err.(*googleapi.Error); ok {
+			if e.Code == http.StatusNotFound {
+				return nil
+			}
+		}
+		return err
+	}
 	return bq.client.Dataset(datasetID).Table(tableID).Delete(ctx)
 }
 
@@ -84,4 +121,8 @@ func (bq *BigQuery) Tables(ctx context.Context, datasetID string) ([]string, err
 		}
 		tables = append(tables, table.TableID)
 	}
+}
+
+func (bq *BigQuery) Insert(ctx context.Context, datasetID, tableID string, items interface{}) error {
+	return bq.client.Dataset(datasetID).Table(tableID).Inserter().Put(ctx, items)
 }

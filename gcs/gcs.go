@@ -25,27 +25,30 @@ func (s *Gcs) Close() error {
 }
 
 func (s *Gcs) CreateBucket(ctx context.Context, projectID, name string) error {
-	return s.client.Bucket(name).Create(ctx, projectID, nil)
+	_, err := s.client.Bucket(name).Attrs(ctx)
+	if err == storage.ErrBucketNotExist {
+		return s.client.Bucket(name).Create(ctx, projectID, nil)
+	}
+	return err
 }
 
 func (s *Gcs) DeleteBucket(ctx context.Context, name string) error {
-	return s.client.Bucket(name).Delete(ctx)
+	err := s.client.Bucket(name).Delete(ctx)
+	if err == storage.ErrBucketNotExist {
+		return nil
+	}
+	return err
 }
 
 func (s *Gcs) ExistsBucket(ctx context.Context, projectID, name string) (bool, error) {
-	it := s.client.Buckets(ctx, projectID)
-	for {
-		attr, err := it.Next()
-		if err == iterator.Done {
-			return false, nil
-		}
-		if err != nil {
-			return false, err
-		}
-		if attr.Name == name {
-			return true, nil
-		}
+	_, err := s.client.Bucket(name).Attrs(ctx)
+	if err == storage.ErrBucketNotExist {
+		return false, nil
 	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (s *Gcs) Buckets(ctx context.Context, projectID string) ([]string, error) {
@@ -87,7 +90,11 @@ func (s *Gcs) Read(ctx context.Context, bucket, name string) ([]byte, error) {
 }
 
 func (s *Gcs) Delete(ctx context.Context, bucket, name string) error {
-	return s.client.Bucket(bucket).Object(name).Delete(ctx)
+	err := s.client.Bucket(bucket).Object(name).Delete(ctx)
+	if err == storage.ErrBucketNotExist {
+		return nil
+	}
+	return err
 }
 
 func (s *Gcs) List(ctx context.Context, bucket, prefix string) ([]string, error) {
@@ -109,19 +116,12 @@ func (s *Gcs) List(ctx context.Context, bucket, prefix string) ([]string, error)
 }
 
 func (s *Gcs) Exists(ctx context.Context, bucket, name string) (bool, error) {
-	query := &storage.Query{Prefix: name}
-
-	it := s.client.Bucket(bucket).Objects(ctx, query)
-	for {
-		obj, err := it.Next()
-		if err == iterator.Done {
-			return false, nil
-		}
-		if err != nil {
-			return false, err
-		}
-		if name == obj.Name { // not prefix match
-			return true, nil
-		}
+	_, err := s.client.Bucket(bucket).Object(name).Attrs(ctx)
+	if err == storage.ErrObjectNotExist {
+		return false, nil
 	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

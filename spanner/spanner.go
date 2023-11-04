@@ -147,9 +147,9 @@ func (d *DatabaseAdmin) Databases(ctx context.Context, projectID, instanceID str
 	}
 }
 
-func (d *DatabaseAdmin) CreateTable(ctx context.Context, databaseID, ddl string) error {
+func (d *DatabaseAdmin) CreateTable(ctx context.Context, projectID, instanceID, databaseID, ddl string) error {
 	op, err := d.client.UpdateDatabaseDdl(ctx, &databasepb.UpdateDatabaseDdlRequest{
-		Database:   databaseID,
+		Database:   fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID),
 		Statements: []string{ddl},
 	})
 	if err != nil {
@@ -158,9 +158,9 @@ func (d *DatabaseAdmin) CreateTable(ctx context.Context, databaseID, ddl string)
 	return op.Wait(ctx)
 }
 
-func (d *DatabaseAdmin) DropTable(ctx context.Context, databaseID, name string) error {
+func (d *DatabaseAdmin) DropTable(ctx context.Context, projectID, instanceID, databaseID, name string) error {
 	op, err := d.client.UpdateDatabaseDdl(ctx, &databasepb.UpdateDatabaseDdlRequest{
-		Database:   databaseID,
+		Database:   fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID),
 		Statements: []string{fmt.Sprintf("DROP TABLE IF EXISTS `%s`", name)},
 	})
 	if err != nil {
@@ -185,7 +185,7 @@ func (s *Spanner) Tables(ctx context.Context) ([]string, error) {
 	tables := []string{}
 
 	it := s.client.Single().Query(ctx, spannerapi.Statement{
-		SQL: `SELECT table_name FROM information_schema.tables WHERE table_schema = ''`,
+		SQL: "SELECT table_name FROM information_schema.tables WHERE table_schema = ''",
 	})
 	defer it.Stop()
 
@@ -208,4 +208,17 @@ func (s *Spanner) Tables(ctx context.Context) ([]string, error) {
 func (s *Spanner) SingleQuery(ctx context.Context, sql string) *spannerapi.RowIterator {
 	stmt := spannerapi.Statement{SQL: sql}
 	return s.client.Single().Query(ctx, stmt)
+}
+
+func (s *Spanner) UpdateSQL(ctx context.Context, sql string) error {
+	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spannerapi.ReadWriteTransaction) error {
+		_, err := txn.Update(ctx, spannerapi.Statement{SQL: sql})
+		return err
+	})
+	return err
+}
+
+func (s *Spanner) UpdateMutation(ctx context.Context, ms []*spannerapi.Mutation) error {
+	_, err := s.client.Apply(ctx, ms)
+	return err
 }
