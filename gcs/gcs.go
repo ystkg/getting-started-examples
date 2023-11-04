@@ -36,10 +36,10 @@ func (s *Gcs) ExistsBucket(ctx context.Context, projectID, name string) (bool, e
 	it := s.client.Buckets(ctx, projectID)
 	for {
 		attr, err := it.Next()
+		if err == iterator.Done {
+			return false, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				return false, nil
-			}
 			return false, err
 		}
 		if attr.Name == name {
@@ -48,22 +48,20 @@ func (s *Gcs) ExistsBucket(ctx context.Context, projectID, name string) (bool, e
 	}
 }
 
-func (s *Gcs) ListBuckets(ctx context.Context, projectID string) ([]string, error) {
+func (s *Gcs) Buckets(ctx context.Context, projectID string) ([]string, error) {
 	buckets := []string{}
 
 	it := s.client.Buckets(ctx, projectID)
 	for {
 		attr, err := it.Next()
+		if err == iterator.Done {
+			return buckets, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			return nil, err
 		}
 		buckets = append(buckets, attr.Name)
 	}
-
-	return buckets, nil
 }
 
 func (s *Gcs) Write(ctx context.Context, bucket, name, contentType string, bytes []byte) error {
@@ -100,16 +98,14 @@ func (s *Gcs) List(ctx context.Context, bucket, prefix string) ([]string, error)
 	it := s.client.Bucket(bucket).Objects(ctx, query)
 	for {
 		obj, err := it.Next()
+		if err == iterator.Done {
+			return names, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			return nil, err
 		}
 		names = append(names, obj.Name)
 	}
-
-	return names, nil
 }
 
 func (s *Gcs) Exists(ctx context.Context, bucket, name string) (bool, error) {
@@ -118,16 +114,14 @@ func (s *Gcs) Exists(ctx context.Context, bucket, name string) (bool, error) {
 	it := s.client.Bucket(bucket).Objects(ctx, query)
 	for {
 		obj, err := it.Next()
+		if err == iterator.Done {
+			return false, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			return false, err
 		}
 		if name == obj.Name { // not prefix match
 			return true, nil
 		}
 	}
-
-	return false, nil
 }

@@ -17,19 +17,19 @@
 
 #### データセット
 
-| 操作 | メソッド名 | パラメータ |
-| --- | --- | --- |
-|作成|CreateDataset|datasetID|
-|削除|DeleteDataset|datasetID|
-|一覧|Datasets||
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | BigQuery | CreateDataset | datasetID |
+| 削除 | BigQuery | DeleteDataset | datasetID |
+| 一覧 | BigQuery | Datasets | |
 
 #### テーブル
 
-| 操作 | メソッド名 | パラメータ |
-| --- | --- | --- |
-|作成|CreateTable|datasetID, tableID, schema|
-|削除|DeleteTable|datasetID, tableID|
-|一覧|Tables|datasetID|
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | BigQuery | CreateTable | datasetID, tableID, schema |
+| 削除 | BigQuery | DeleteTable | datasetID, tableID |
+| 一覧 | BigQuery | Tables      | datasetID |
 
 ## オブジェクトストレージ
 
@@ -37,22 +37,22 @@
 
 #### バケット
 
-| 操作 | メソッド名 | パラメータ |
-| --- | --- | --- |
-|作成|CreateBucket|projectID, name|
-|削除|DeleteBucket|name|
-|存在確認|ExistsBucket|projectID, name|
-|一覧|ListBuckets|projectID|
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成     | Gcs | CreateBucket | projectID, name |
+| 削除     | Gcs | DeleteBucket | name |
+| 存在確認 | Gcs | ExistsBucket | projectID, name |
+| 一覧     | Gcs | Buckets      | projectID |
 
 #### オブジェクト
 
-| 操作 | メソッド名 | パラメータ |
-| --- | --- | --- |
-|書き込み|Write|bucket, name, contentType, bytes|
-|読み込み|Read|bucket, name|
-|削除|Delete|bucket, name|
-|存在確認|Exists|bucket, name|
-|一覧|List|bucket, prefix|
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 書き込み | Gcs | Write  | bucket, name, contentType, bytes |
+| 読み込み | Gcs | Read   | bucket, name |
+| 削除     | Gcs | Delete | bucket, name |
+| 存在確認 | Gcs | Exists | bucket, name |
+| 一覧     | Gcs | List   | bucket, prefix |
 
 ## NewSQL
 

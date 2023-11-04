@@ -44,16 +44,14 @@ func (bq *BigQuery) Datasets(ctx context.Context) ([]string, error) {
 	it := bq.client.Datasets(ctx)
 	for {
 		dataset, err := it.Next()
+		if err == iterator.Done {
+			return datasets, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			return nil, err
 		}
 		datasets = append(datasets, dataset.DatasetID)
 	}
-
-	return datasets, nil
 }
 
 func (bq *BigQuery) CreateTable(ctx context.Context, datasetID, tableID string, schema bigqueryapi.Schema) error {
@@ -78,14 +76,12 @@ func (bq *BigQuery) Tables(ctx context.Context, datasetID string) ([]string, err
 	it := dataset.Tables(ctx)
 	for {
 		table, err := it.Next()
+		if err == iterator.Done {
+			return tables, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			return nil, err
 		}
 		tables = append(tables, table.TableID)
 	}
-
-	return tables, nil
 }
