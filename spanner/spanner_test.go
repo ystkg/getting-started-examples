@@ -48,7 +48,7 @@ func TestConnect(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer instance.Close()
-	if err := instance.CreateInstance(ctx, projectID, instanceID); err != nil {
+	if err := instance.Create(ctx, projectID, instanceID); err != nil {
 		t.Fatal(err)
 	}
 

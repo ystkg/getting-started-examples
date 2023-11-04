@@ -60,22 +60,24 @@
 
 #### インスタンス
 
-| 操作 | メソッド名 | パラメータ |
-| --- | --- | --- |
-|作成|CreateInstance|projectID, instanceID|
-|削除|DeleteInstance|projectID, instanceID|
-|一覧|ListInstances|projectID|
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | InstanceAdmin | Create    | projectID, instanceID |
+| 削除 | InstanceAdmin | Delete    | projectID, instanceID |
+| 一覧 | InstanceAdmin | Instances | projectID |
 
 #### データベース
 
-| 操作 | メソッド名 | パラメータ |
-| --- | --- | --- |
-|作成|CreateDatabase|projectID, instanceID, databaseID|
-|削除|DropDatabase|projectID, instanceID, databaseID|
-|一覧|ListDatabases|projectID, instanceID|
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | DatabaseAdmin | CreateDatabase | projectID, instanceID, databaseID |
+| 削除 | DatabaseAdmin | DropDatabase   | projectID, instanceID, databaseID |
+| 一覧 | DatabaseAdmin | Databases      | projectID, instanceID |
 
 #### テーブル
 
-| 操作 | メソッド名 | パラメータ |
-| --- | --- | --- |
-
+| 操作 | レシーバー | メソッド | パラメータ |
+| --- | --- | --- | --- |
+| 作成 | DatabaseAdmin | CreateTable | projectID, instanceID, databaseID, ddl |
+| 削除 | DatabaseAdmin | DropTable   | projectID, instanceID, databaseID, name |
+| 一覧 | Spanner       | Tables      | |

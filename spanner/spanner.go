@@ -3,6 +3,7 @@ package spanner
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	spannerapi "cloud.google.com/go/spanner"
 	database "cloud.google.com/go/spanner/admin/database/apiv1"
@@ -38,47 +39,52 @@ func (i *InstanceAdmin) Close() {
 	i.client.Close()
 }
 
-func (i *InstanceAdmin) CreateInstance(ctx context.Context, projectID, instanceID string) error {
+func (i *InstanceAdmin) Create(ctx context.Context, projectID, instanceID string) error {
 	op, err := i.client.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
 		Parent:     fmt.Sprintf("projects/%s", projectID),
 		InstanceId: instanceID,
 	})
-	if err == nil {
-		if _, err = op.Wait(ctx); err != nil {
-			return err
-		}
-	} else if status.Code(err) != codes.AlreadyExists {
-		return err
+	code := status.Code(err)
+	if code == codes.AlreadyExists {
+		return nil
 	}
-
-	return nil
+	if code == codes.OK {
+		_, err = op.Wait(ctx)
+	}
+	return err
 }
 
-func (i *InstanceAdmin) DeleteInstance(ctx context.Context, projectID, instanceID string) error {
-	return i.client.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{
+func (i *InstanceAdmin) Delete(ctx context.Context, projectID, instanceID string) error {
+	err := i.client.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{
 		Name: fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
 	})
+	if status.Code(err) == codes.NotFound {
+		return nil
+	}
+	return err
 }
 
-func (i *InstanceAdmin) ListInstances(ctx context.Context, projectID string) ([]string, error) {
-	instances := []string{}
+func (i *InstanceAdmin) Instances(ctx context.Context, projectID string) ([]string, error) {
+	instanceIDs := []string{}
+	parent := fmt.Sprintf("projects/%s", projectID)
+	prefix := parent + "/instances/"
 
 	it := i.client.ListInstances(ctx, &instancepb.ListInstancesRequest{
-		Parent: fmt.Sprintf("projects/%s", projectID),
+		Parent: parent,
 	})
 
 	for {
 		ins, err := it.Next()
+		if err == iterator.Done {
+			return instanceIDs, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			return nil, err
 		}
-		instances = append(instances, ins.Name)
+		if after, found := strings.CutPrefix(ins.Name, prefix); found {
+			instanceIDs = append(instanceIDs, after)
+		}
 	}
-
-	return instances, nil
 }
 
 func NewDatabaseAdmin(ctx context.Context) (*DatabaseAdmin, error) {
@@ -98,42 +104,69 @@ func (d *DatabaseAdmin) CreateDatabase(ctx context.Context, projectID, instanceI
 		Parent:          fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
 		CreateStatement: fmt.Sprintf("CREATE DATABASE `%s`", databaseID),
 	})
-	if err == nil {
-		if _, err = op.Wait(ctx); err != nil {
-			return err
-		}
-	} else if status.Code(err) != codes.AlreadyExists {
-		return err
+	code := status.Code(err)
+	if code == codes.AlreadyExists {
+		return nil
 	}
-
-	return nil
+	if err == nil {
+		_, err = op.Wait(ctx)
+	}
+	return err
 }
 
 func (d *DatabaseAdmin) DropDatabase(ctx context.Context, projectID, instanceID, databaseID string) error {
-	return d.client.DropDatabase(ctx, &databasepb.DropDatabaseRequest{
+	err := d.client.DropDatabase(ctx, &databasepb.DropDatabaseRequest{
 		Database: fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID),
 	})
+	if status.Code(err) == codes.NotFound {
+		return nil
+	}
+	return err
 }
 
-func (d *DatabaseAdmin) ListDatabases(ctx context.Context, projectID, instanceID string) ([]string, error) {
-	databases := []string{}
+func (d *DatabaseAdmin) Databases(ctx context.Context, projectID, instanceID string) ([]string, error) {
+	databaseIDs := []string{}
+	parent := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
+	prefix := parent + "/databases/"
 
 	it := d.client.ListDatabases(ctx, &databasepb.ListDatabasesRequest{
-		Parent: fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
+		Parent: parent,
 	})
 
 	for {
 		db, err := it.Next()
+		if err == iterator.Done {
+			return databaseIDs, nil
+		}
 		if err != nil {
-			if err == iterator.Done {
-				break
-			}
 			return nil, err
 		}
-		databases = append(databases, db.Name)
+		if after, found := strings.CutPrefix(db.Name, prefix); found {
+			databaseIDs = append(databaseIDs, after)
+		}
 	}
+}
 
-	return databases, nil
+func (d *DatabaseAdmin) CreateTable(ctx context.Context, databaseID, ddl string) error {
+	op, err := d.client.UpdateDatabaseDdl(ctx, &databasepb.UpdateDatabaseDdlRequest{
+		Database:   databaseID,
+		Statements: []string{ddl},
+	})
+	if err != nil {
+		return err
+	}
+	return op.Wait(ctx)
+}
+
+func (d *DatabaseAdmin) DropTable(ctx context.Context, databaseID, name string) error {
+	op, err := d.client.UpdateDatabaseDdl(ctx, &databasepb.UpdateDatabaseDdlRequest{
+		Database:   databaseID,
+		Statements: []string{fmt.Sprintf("DROP TABLE IF EXISTS `%s`", name)},
+	})
+	if err != nil {
+		return err
+	}
+	return op.Wait(ctx)
 }
 
 func NewSpanner(ctx context.Context, db string) (*Spanner, error) {
@@ -146,6 +179,30 @@ func NewSpanner(ctx context.Context, db string) (*Spanner, error) {
 
 func (s *Spanner) Close() {
 	s.client.Close()
+}
+
+func (s *Spanner) Tables(ctx context.Context) ([]string, error) {
+	tables := []string{}
+
+	it := s.client.Single().Query(ctx, spannerapi.Statement{
+		SQL: `SELECT table_name FROM information_schema.tables WHERE table_schema = ''`,
+	})
+	defer it.Stop()
+
+	for {
+		row, err := it.Next()
+		if err == iterator.Done {
+			return tables, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		var table string
+		if err := row.Columns(&table); err != nil {
+			return nil, err
+		}
+		tables = append(tables, table)
+	}
 }
 
 func (s *Spanner) SingleQuery(ctx context.Context, sql string) *spannerapi.RowIterator {
