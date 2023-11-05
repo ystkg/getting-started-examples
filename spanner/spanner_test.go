@@ -160,18 +160,19 @@ func TestCreateDelete(t *testing.T) {
 
 	reader := csv.NewReader(bytes.NewReader(storeItems))
 	reader.Comma = '\t'
-	items, err := reader.ReadAll()
+	records, err := reader.ReadAll()
 	if err != nil {
 		t.Fatal(err)
 	}
+	cols := records[0]
 
 	m := []*spannerapi.Mutation{}
-	for _, v := range items {
-		vals := []any{}
-		for _, vv := range v {
-			vals = append(vals, vv)
+	for _, v := range records[1:] {
+		vals := make([]any, len(v))
+		for i, vv := range v {
+			vals[i] = vv
 		}
-		m = append(m, spannerapi.InsertOrUpdate(table, []string{"StoreId", "Name"}, vals))
+		m = append(m, spannerapi.InsertOrUpdate(table, cols, vals))
 	}
 
 	if err = client.UpdateMutation(ctx, m); err != nil {
