@@ -136,3 +136,24 @@ func (bq *BigQuery) Tables(ctx context.Context, datasetID string) ([]string, err
 func (bq *BigQuery) Insert(ctx context.Context, datasetID, tableID string, items interface{}) error {
 	return bq.client.Dataset(datasetID).Table(tableID).Inserter().Put(ctx, items)
 }
+
+func (bq *BigQuery) Query(ctx context.Context, sql string) ([][]bigqueryapi.Value, error) {
+	it, err := bq.client.Query(sql).Read(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	rows := [][]bigqueryapi.Value{}
+
+	for {
+		var values []bigqueryapi.Value
+		err = it.Next(&values)
+		if err == iterator.Done {
+			return rows, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, values)
+	}
+}

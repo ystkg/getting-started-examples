@@ -5,6 +5,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/csv"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -25,6 +26,7 @@ type DockerCompose struct {
 	}
 }
 
+// *bigqueryapi.RowIterator.Next(&store)
 type Store struct {
 	StoreID int    `bigquery:"store_id"`
 	Name    string `bigquery:"name"`
@@ -66,6 +68,17 @@ func TestConnect(t *testing.T) {
 	}
 	if tables == nil {
 		t.Error("tables is nil")
+	}
+
+	const want = 1
+	rows, err := client.Query(ctx, fmt.Sprintf("SELECT %d", want))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := rows[0][0].(int64)
+	if got != want {
+		t.Errorf("%d, want %d", got, want)
 	}
 }
 

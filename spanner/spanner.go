@@ -220,8 +220,8 @@ func (s *Spanner) Tables(ctx context.Context) ([]string, error) {
 }
 
 func (s *Spanner) UpdateSQL(ctx context.Context, sql string) error {
-	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spannerapi.ReadWriteTransaction) error {
-		_, err := txn.Update(ctx, spannerapi.Statement{SQL: sql})
+	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, tx *spannerapi.ReadWriteTransaction) error {
+		_, err := tx.Update(ctx, spannerapi.Statement{SQL: sql})
 		return err
 	})
 	return err
@@ -232,7 +232,21 @@ func (s *Spanner) UpdateMutation(ctx context.Context, ms []*spannerapi.Mutation)
 	return err
 }
 
-func (s *Spanner) SingleQuery(ctx context.Context, sql string) *spannerapi.RowIterator {
+func (s *Spanner) Query(ctx context.Context, sql string) ([]*spannerapi.Row, error) {
 	stmt := spannerapi.Statement{SQL: sql}
-	return s.client.Single().Query(ctx, stmt)
+	it := s.client.Single().Query(ctx, stmt)
+	defer it.Stop()
+
+	rows := []*spannerapi.Row{}
+
+	for {
+		row, err := it.Next()
+		if err == iterator.Done {
+			return rows, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, row)
+	}
 }

@@ -25,6 +25,12 @@ type DockerCompose struct {
 	}
 }
 
+// *spannerapi.Row.ToStruct(&store)
+type Store struct {
+	StoreID int    `spanner:"StoreId"`
+	Name    string `spanner:"Name"`
+}
+
 var (
 	//go:embed testdata/store.ddl
 	storeDdl string
@@ -96,16 +102,13 @@ func TestConnect(t *testing.T) {
 	defer client.Close()
 
 	const want = 1
-	it := client.SingleQuery(ctx, fmt.Sprintf("SELECT %d", want))
-	defer it.Stop()
-
-	row, err := it.Next()
+	rows, err := client.Query(ctx, fmt.Sprintf("SELECT %d", want))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var got int64
-	if err = row.Columns(&got); err != nil {
+	if err = rows[0].Columns(&got); err != nil {
 		t.Fatal(err)
 	}
 	if got != want {
@@ -164,7 +167,7 @@ func TestCreateDelete(t *testing.T) {
 
 	m := []*spannerapi.Mutation{}
 	for _, v := range items {
-		vals := []interface{}{}
+		vals := []any{}
 		for _, vv := range v {
 			vals = append(vals, vv)
 		}
