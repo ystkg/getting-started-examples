@@ -24,6 +24,8 @@ func (s *Gcs) Close() error {
 	return s.client.Close()
 }
 
+// バケット作成
+// if not exists
 func (s *Gcs) CreateBucket(ctx context.Context, projectID, name string) error {
 	_, err := s.client.Bucket(name).Attrs(ctx)
 	if err == storage.ErrBucketNotExist {
@@ -32,6 +34,8 @@ func (s *Gcs) CreateBucket(ctx context.Context, projectID, name string) error {
 	return err
 }
 
+// バケット削除
+// if exists
 func (s *Gcs) DeleteBucket(ctx context.Context, name string) error {
 	err := s.client.Bucket(name).Delete(ctx)
 	if err == storage.ErrBucketNotExist {
@@ -40,6 +44,7 @@ func (s *Gcs) DeleteBucket(ctx context.Context, name string) error {
 	return err
 }
 
+// バケット存在確認
 func (s *Gcs) ExistsBucket(ctx context.Context, projectID, name string) (bool, error) {
 	_, err := s.client.Bucket(name).Attrs(ctx)
 	if err == storage.ErrBucketNotExist {
@@ -51,6 +56,7 @@ func (s *Gcs) ExistsBucket(ctx context.Context, projectID, name string) (bool, e
 	return true, nil
 }
 
+// バケット一覧
 func (s *Gcs) Buckets(ctx context.Context, projectID string) ([]string, error) {
 	buckets := []string{}
 
@@ -67,6 +73,8 @@ func (s *Gcs) Buckets(ctx context.Context, projectID string) ([]string, error) {
 	}
 }
 
+// オブジェクト書き込み
+// create or replace
 func (s *Gcs) Write(ctx context.Context, bucket, name, contentType string, bytes []byte) error {
 	w := s.client.Bucket(bucket).Object(name).NewWriter(ctx)
 	defer w.Close()
@@ -79,6 +87,7 @@ func (s *Gcs) Write(ctx context.Context, bucket, name, contentType string, bytes
 	return nil
 }
 
+// オブジェクト読み込み
 func (s *Gcs) Read(ctx context.Context, bucket, name string) ([]byte, error) {
 	r, err := s.client.Bucket(bucket).Object(name).NewReader(ctx)
 	if err != nil {
@@ -89,14 +98,17 @@ func (s *Gcs) Read(ctx context.Context, bucket, name string) ([]byte, error) {
 	return io.ReadAll(r)
 }
 
+// オブジェクト削除
+// if exists
 func (s *Gcs) Delete(ctx context.Context, bucket, name string) error {
 	err := s.client.Bucket(bucket).Object(name).Delete(ctx)
-	if err == storage.ErrBucketNotExist {
+	if err == storage.ErrObjectNotExist {
 		return nil
 	}
 	return err
 }
 
+// オブジェクト一覧
 func (s *Gcs) List(ctx context.Context, bucket, prefix string) ([]string, error) {
 	query := &storage.Query{Prefix: prefix}
 
@@ -115,6 +127,7 @@ func (s *Gcs) List(ctx context.Context, bucket, prefix string) ([]string, error)
 	}
 }
 
+// オブジェクト存在確認
 func (s *Gcs) Exists(ctx context.Context, bucket, name string) (bool, error) {
 	_, err := s.client.Bucket(bucket).Object(name).Attrs(ctx)
 	if err == storage.ErrObjectNotExist {

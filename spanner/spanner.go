@@ -39,6 +39,8 @@ func (i *InstanceAdmin) Close() {
 	i.client.Close()
 }
 
+// インスタンス作成
+// if not exists
 func (i *InstanceAdmin) Create(ctx context.Context, projectID, instanceID string) error {
 	op, err := i.client.CreateInstance(ctx, &instancepb.CreateInstanceRequest{
 		Parent:     fmt.Sprintf("projects/%s", projectID),
@@ -54,6 +56,8 @@ func (i *InstanceAdmin) Create(ctx context.Context, projectID, instanceID string
 	return err
 }
 
+// インスタンス削除
+// if exists
 func (i *InstanceAdmin) Delete(ctx context.Context, projectID, instanceID string) error {
 	err := i.client.DeleteInstance(ctx, &instancepb.DeleteInstanceRequest{
 		Name: fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
@@ -64,6 +68,7 @@ func (i *InstanceAdmin) Delete(ctx context.Context, projectID, instanceID string
 	return err
 }
 
+// インスタンス一覧
 func (i *InstanceAdmin) Instances(ctx context.Context, projectID string) ([]string, error) {
 	instanceIDs := []string{}
 	parent := fmt.Sprintf("projects/%s", projectID)
@@ -99,6 +104,8 @@ func (d *DatabaseAdmin) Close() {
 	d.client.Close()
 }
 
+// データベース作成
+// if not exists
 func (d *DatabaseAdmin) CreateDatabase(ctx context.Context, projectID, instanceID, databaseID string) error {
 	op, err := d.client.CreateDatabase(ctx, &databasepb.CreateDatabaseRequest{
 		Parent:          fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID),
@@ -114,6 +121,8 @@ func (d *DatabaseAdmin) CreateDatabase(ctx context.Context, projectID, instanceI
 	return err
 }
 
+// インスタンス削除
+// if exists
 func (d *DatabaseAdmin) DropDatabase(ctx context.Context, projectID, instanceID, databaseID string) error {
 	err := d.client.DropDatabase(ctx, &databasepb.DropDatabaseRequest{
 		Database: fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID),
@@ -124,6 +133,7 @@ func (d *DatabaseAdmin) DropDatabase(ctx context.Context, projectID, instanceID,
 	return err
 }
 
+// インスタンス一覧
 func (d *DatabaseAdmin) Databases(ctx context.Context, projectID, instanceID string) ([]string, error) {
 	databaseIDs := []string{}
 	parent := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
@@ -147,6 +157,7 @@ func (d *DatabaseAdmin) Databases(ctx context.Context, projectID, instanceID str
 	}
 }
 
+// テーブル作成
 func (d *DatabaseAdmin) CreateTable(ctx context.Context, projectID, instanceID, databaseID, ddl string) error {
 	op, err := d.client.UpdateDatabaseDdl(ctx, &databasepb.UpdateDatabaseDdlRequest{
 		Database:   fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID),
@@ -158,6 +169,8 @@ func (d *DatabaseAdmin) CreateTable(ctx context.Context, projectID, instanceID, 
 	return op.Wait(ctx)
 }
 
+// テーブル削除
+// if not exists
 func (d *DatabaseAdmin) DropTable(ctx context.Context, projectID, instanceID, databaseID, name string) error {
 	op, err := d.client.UpdateDatabaseDdl(ctx, &databasepb.UpdateDatabaseDdlRequest{
 		Database:   fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID),
@@ -181,6 +194,7 @@ func (s *Spanner) Close() {
 	s.client.Close()
 }
 
+// テーブル一覧
 func (s *Spanner) Tables(ctx context.Context) ([]string, error) {
 	tables := []string{}
 
@@ -205,14 +219,9 @@ func (s *Spanner) Tables(ctx context.Context) ([]string, error) {
 	}
 }
 
-func (s *Spanner) SingleQuery(ctx context.Context, sql string) *spannerapi.RowIterator {
-	stmt := spannerapi.Statement{SQL: sql}
-	return s.client.Single().Query(ctx, stmt)
-}
-
 func (s *Spanner) UpdateSQL(ctx context.Context, sql string) error {
-	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spannerapi.ReadWriteTransaction) error {
-		_, err := txn.Update(ctx, spannerapi.Statement{SQL: sql})
+	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, tx *spannerapi.ReadWriteTransaction) error {
+		_, err := tx.Update(ctx, spannerapi.Statement{SQL: sql})
 		return err
 	})
 	return err
@@ -221,4 +230,23 @@ func (s *Spanner) UpdateSQL(ctx context.Context, sql string) error {
 func (s *Spanner) UpdateMutation(ctx context.Context, ms []*spannerapi.Mutation) error {
 	_, err := s.client.Apply(ctx, ms)
 	return err
+}
+
+func (s *Spanner) Query(ctx context.Context, sql string) ([]*spannerapi.Row, error) {
+	stmt := spannerapi.Statement{SQL: sql}
+	it := s.client.Single().Query(ctx, stmt)
+	defer it.Stop()
+
+	rows := []*spannerapi.Row{}
+
+	for {
+		row, err := it.Next()
+		if err == iterator.Done {
+			return rows, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		rows = append(rows, row)
+	}
 }
