@@ -23,11 +23,13 @@ type DockerCompose struct {
 	}
 }
 
-//go:embed testdata/file1.txt
-var file1 []byte
+var (
+	//go:embed testdata/file1.txt
+	file1 []byte
 
-//go:embed testdata/file2.txt
-var file2 []byte
+	//go:embed testdata/file2.txt
+	file2 []byte
+)
 
 func TestMain(m *testing.M) {
 	if err := setup(); err != nil {
@@ -123,7 +125,7 @@ func TestWriteRead(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(file1, got) {
+	if !bytes.Equal(got, file1) {
 		t.Error("file1 not equal")
 	}
 
@@ -143,7 +145,7 @@ func TestWriteRead(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(file2, got) {
+	if !bytes.Equal(got, file2) {
 		t.Error("file2 not equal")
 	}
 

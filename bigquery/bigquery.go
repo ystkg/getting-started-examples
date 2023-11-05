@@ -31,6 +31,8 @@ func (bq *BigQuery) Close() error {
 	return bq.client.Close()
 }
 
+// データセット作成
+// if not exists
 func (bq *BigQuery) CreateDataset(ctx context.Context, datasetID string) error {
 	md := &bigqueryapi.DatasetMetadata{}
 	_, err := bq.client.Dataset(datasetID).Metadata(ctx)
@@ -45,6 +47,8 @@ func (bq *BigQuery) CreateDataset(ctx context.Context, datasetID string) error {
 	return bq.client.Dataset(datasetID).Create(ctx, md)
 }
 
+// データセット削除
+// if exists
 func (bq *BigQuery) DeleteDataset(ctx context.Context, datasetID string) error {
 	_, err := bq.client.Dataset(datasetID).Metadata(ctx)
 	if err != nil {
@@ -58,6 +62,7 @@ func (bq *BigQuery) DeleteDataset(ctx context.Context, datasetID string) error {
 	return bq.client.Dataset(datasetID).Delete(ctx)
 }
 
+// データセット一覧
 func (bq *BigQuery) Datasets(ctx context.Context) ([]string, error) {
 	datasets := []string{}
 
@@ -74,6 +79,8 @@ func (bq *BigQuery) Datasets(ctx context.Context) ([]string, error) {
 	}
 }
 
+// テーブル作成
+// if not exists
 func (bq *BigQuery) CreateTable(ctx context.Context, datasetID, tableID string, schema bigqueryapi.Schema) error {
 	_, err := bq.client.Dataset(datasetID).Table(tableID).Metadata(ctx)
 	if err == nil {
@@ -89,6 +96,8 @@ func (bq *BigQuery) CreateTable(ctx context.Context, datasetID, tableID string, 
 	})
 }
 
+// テーブル削除
+// if exists
 func (bq *BigQuery) DeleteTable(ctx context.Context, datasetID, tableID string) error {
 	_, err := bq.client.Dataset(datasetID).Table(tableID).Metadata(ctx)
 	if err != nil {
@@ -102,6 +111,7 @@ func (bq *BigQuery) DeleteTable(ctx context.Context, datasetID, tableID string) 
 	return bq.client.Dataset(datasetID).Table(tableID).Delete(ctx)
 }
 
+// テーブル一覧
 func (bq *BigQuery) Tables(ctx context.Context, datasetID string) ([]string, error) {
 	dataset := bq.client.Dataset(datasetID)
 	if dataset == nil {

@@ -1,7 +1,10 @@
 package bigquery_test
 
 import (
+	"bytes"
 	"context"
+	_ "embed"
+	"encoding/csv"
 	"os"
 	"strings"
 	"testing"
@@ -26,6 +29,11 @@ type Store struct {
 	StoreID int    `bigquery:"store_id"`
 	Name    string `bigquery:"name"`
 }
+
+var (
+	//go:embed testdata/store.tsv
+	storeItems []byte
+)
 
 func TestConnect(t *testing.T) {
 	buf, err := os.ReadFile("../docker-compose.yml")
@@ -70,7 +78,7 @@ func value(cmd, key string) string {
 	return ""
 }
 
-func TestCreate(t *testing.T) {
+func TestCreateDelete(t *testing.T) {
 	buf, err := os.ReadFile("../docker-compose.yml")
 	if err != nil {
 		t.Fatal(err)
@@ -109,11 +117,13 @@ func TestCreate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	items := []*Store{
-		{StoreID: 1, Name: "store1"},
-		{StoreID: 2, Name: "store2"},
-		{StoreID: 3, Name: "store3"},
+	reader := csv.NewReader(bytes.NewReader(storeItems))
+	reader.Comma = '\t'
+	items, err := reader.ReadAll()
+	if err != nil {
+		t.Fatal(err)
 	}
+
 	client.Insert(ctx, datasetID, tableID, items)
 
 	if err = client.DeleteTable(ctx, datasetID, tableID); err != nil {

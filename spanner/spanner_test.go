@@ -1,8 +1,10 @@
 package spanner_test
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
+	"encoding/csv"
 	"fmt"
 	"log"
 	"os"
@@ -23,11 +25,16 @@ type DockerCompose struct {
 	}
 }
 
-//go:embed testdata/store.ddl
-var storeDdl string
+var (
+	//go:embed testdata/store.ddl
+	storeDdl string
 
-//go:embed testdata/store.dml
-var storeDml string
+	//go:embed testdata/store.dml
+	storeDml string
+
+	//go:embed testdata/store.tsv
+	storeItems []byte
+)
 
 func TestMain(m *testing.M) {
 	if err := setup(); err != nil {
@@ -106,10 +113,11 @@ func TestConnect(t *testing.T) {
 	}
 }
 
-func TestTable(t *testing.T) {
+func TestCreateDelete(t *testing.T) {
 	const projectID = "local-spanner-20231030"
 	const instanceID = "instance1"
 	const databaseID = "database1"
+	const table = "Store"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -147,16 +155,27 @@ func TestTable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m := []*spannerapi.Mutation{
-		spannerapi.InsertOrUpdate("Store", []string{"StoreId", "Name"}, []interface{}{6, "store6"}),
-		spannerapi.InsertOrUpdate("Store", []string{"StoreId", "Name"}, []interface{}{7, "store7"}),
-		spannerapi.InsertOrUpdate("Store", []string{"StoreId", "Name"}, []interface{}{8, "store8"}),
+	reader := csv.NewReader(bytes.NewReader(storeItems))
+	reader.Comma = '\t'
+	items, err := reader.ReadAll()
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	m := []*spannerapi.Mutation{}
+	for _, v := range items {
+		vals := []interface{}{}
+		for _, vv := range v {
+			vals = append(vals, vv)
+		}
+		m = append(m, spannerapi.InsertOrUpdate(table, []string{"StoreId", "Name"}, vals))
+	}
+
 	if err = client.UpdateMutation(ctx, m); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = database.DropTable(ctx, projectID, instanceID, databaseID, "Store"); err != nil {
+	if err = database.DropTable(ctx, projectID, instanceID, databaseID, table); err != nil {
 		t.Fatal(err)
 	}
 }
