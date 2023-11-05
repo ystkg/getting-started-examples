@@ -132,12 +132,12 @@ func TestCreateDelete(t *testing.T) {
 
 	reader := csv.NewReader(bytes.NewReader(storeItems))
 	reader.Comma = '\t'
-	items, err := reader.ReadAll()
+	records, err := reader.ReadAll()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	client.Insert(ctx, datasetID, tableID, items)
+	client.Insert(ctx, datasetID, tableID, records[1:])
 
 	if err = client.DeleteTable(ctx, datasetID, tableID); err != nil {
 		t.Fatal(err)
