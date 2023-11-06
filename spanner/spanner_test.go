@@ -165,14 +165,15 @@ func TestCreateDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 	cols := records[0]
+	items := records[1:]
 
-	m := []*spannerapi.Mutation{}
-	for _, v := range records[1:] {
+	m := make([]*spannerapi.Mutation, len(items))
+	for i, v := range items {
 		vals := make([]any, len(v))
-		for i, vv := range v {
-			vals[i] = vv
+		for j, vv := range v {
+			vals[j] = vv
 		}
-		m = append(m, spannerapi.InsertOrUpdate(table, cols, vals))
+		m[i] = spannerapi.InsertOrUpdate(table, cols, vals)
 	}
 
 	if err = client.UpdateMutation(ctx, m); err != nil {

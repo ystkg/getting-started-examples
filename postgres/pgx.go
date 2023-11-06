@@ -3,9 +3,9 @@ package postgres
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewPgxClient(dsn string) (*pgx.Conn, error) {
-	return pgx.Connect(context.Background(), dsn)
+func NewPgxClient(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
+	return pgxpool.New(ctx, dsn)
 }
