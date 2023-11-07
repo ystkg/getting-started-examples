@@ -1,0 +1,6 @@
+INSERT store (store_id, name) VALUES
+(1, 'store1'),
+(2, 'store2'),
+(3, 'store3'),
+(4, 'store4'),
+(5, 'store5')
