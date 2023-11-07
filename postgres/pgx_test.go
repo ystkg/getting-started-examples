@@ -38,12 +38,12 @@ func TestConnectPgx(t *testing.T) {
 
 	port, _, _ := strings.Cut(conf.Services.Postgres.Ports[0], ":")
 	password := conf.Services.Postgres.Environment.PostgresPassword
-	dsn := fmt.Sprintf("host=localhost port=%s user=postgres password=%s dbname=postgres sslmode=disable TimeZone=Asia/Tokyo", port, password)
+	dsn := fmt.Sprintf("host=localhost port=%s user=postgres password=%s sslmode=disable TimeZone=Asia/Tokyo", port, password)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	client, err := postgres.NewPgxClient(ctx, dsn)
+	client, err := postgres.NewPostgres(ctx, dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,17 +67,8 @@ func TestCreateDelete(t *testing.T) {
 
 	port, _, _ := strings.Cut(conf.Services.Postgres.Ports[0], ":")
 	password := conf.Services.Postgres.Environment.PostgresPassword
-	dsn := fmt.Sprintf("host=localhost port=%s user=postgres password=%s dbname=postgres sslmode=disable TimeZone=Asia/Tokyo", port, password)
+	const dbname = "test01"
 	const table = "store"
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	client, err := postgres.NewPgxClient(ctx, dsn)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer client.Close()
 
 	reader := csv.NewReader(bytes.NewReader(storeItems))
 	reader.Comma = '\t'
@@ -88,19 +79,34 @@ func TestCreateDelete(t *testing.T) {
 	columnNames := records[0]
 	rows := records[1:]
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	dsn := fmt.Sprintf("host=localhost port=%s user=postgres password=%s sslmode=disable TimeZone=Asia/Tokyo", port, password)
+	admin, err := postgres.NewPostgres(ctx, dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer admin.Close()
+
+	if err = admin.CreateOrReplaceDatabase(ctx, dbname); err != nil {
+		t.Fatal(err)
+	}
+
+	dsn = fmt.Sprintf("host=localhost port=%s user=postgres password=%s dbname=%s sslmode=disable TimeZone=Asia/Tokyo", port, password, dbname)
+	client, err := postgres.NewPostgres(ctx, dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+
 	tx, err := client.Begin(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, fmt.Sprintf("DROP TABLE IF EXISTS %s", table))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_, err = tx.Exec(ctx, storeDdl)
-	if err != nil {
+	if _, err = tx.Exec(ctx, storeDdl); err != nil {
 		t.Fatal(err)
 	}
 
@@ -129,6 +135,10 @@ func TestCreateDelete(t *testing.T) {
 	}
 
 	if err = tx.Commit(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = admin.DropDatabaseIfExists(ctx, dbname); err != nil {
 		t.Fatal(err)
 	}
 }

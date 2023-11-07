@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS store (
+    store_id INT PRIMARY KEY,
+    name VARCHAR(100)
+)
