@@ -8,6 +8,7 @@ require (
 	cloud.google.com/go/storage v1.34.1
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/googleapis/go-sql-spanner v1.1.1
 	github.com/jackc/pgx/v5 v5.5.0
 	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.3.0
