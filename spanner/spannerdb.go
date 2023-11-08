@@ -7,6 +7,7 @@ import (
 	_ "github.com/googleapis/go-sql-spanner"
 )
 
+// go-sql-spanner
 type SpannerDB struct {
 	db *sql.DB
 }

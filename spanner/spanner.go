@@ -23,6 +23,7 @@ type DatabaseAdmin struct {
 	client *database.DatabaseAdminClient
 }
 
+// google-cloud-go
 type Spanner struct {
 	client *spannerapi.Client
 }
