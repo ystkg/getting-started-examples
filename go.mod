@@ -1,6 +1,6 @@
 module github.com/ystkg/getting-started-examples
 
-go 1.21.3
+go 1.21.4
 
 require (
 	cloud.google.com/go/bigquery v1.57.1
