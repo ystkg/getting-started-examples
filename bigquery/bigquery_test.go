@@ -122,6 +122,10 @@ func TestCreateDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err = client.DeleteTable(ctx, datasetID, tableID); err != nil {
+		t.Fatal(err)
+	}
+
 	schema := bigqueryapi.Schema{
 		{Name: "store_id", Type: bigqueryapi.IntegerFieldType},
 		{Name: "name", Type: bigqueryapi.StringFieldType},
@@ -142,6 +146,7 @@ func TestCreateDelete(t *testing.T) {
 	if err = client.DeleteTable(ctx, datasetID, tableID); err != nil {
 		t.Fatal(err)
 	}
+
 	if err = client.DeleteDataset(ctx, datasetID); err != nil {
 		t.Fatal(err)
 	}

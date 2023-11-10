@@ -116,6 +116,10 @@ func TestCreateDelete(t *testing.T) {
 	}
 	defer tx.Rollback()
 
+	if _, err = tx.ExecContext(ctx, "DROP TABLE IF EXISTS store"); err != nil {
+		t.Fatal(err)
+	}
+
 	if _, err = tx.ExecContext(ctx, storeDdl); err != nil {
 		t.Fatal(err)
 	}

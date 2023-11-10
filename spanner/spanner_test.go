@@ -143,6 +143,10 @@ func TestCreateDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err = database.DropTable(ctx, projectID, instanceID, databaseID, table); err != nil {
+		t.Fatal(err)
+	}
+
 	if err = database.CreateTable(ctx, projectID, instanceID, databaseID, storeDdl); err != nil {
 		t.Fatal(err)
 	}
