@@ -122,7 +122,7 @@ func (d *DatabaseAdmin) CreateDatabase(ctx context.Context, projectID, instanceI
 	return err
 }
 
-// インスタンス削除
+// データベース削除
 // if exists
 func (d *DatabaseAdmin) DropDatabase(ctx context.Context, projectID, instanceID, databaseID string) error {
 	err := d.client.DropDatabase(ctx, &databasepb.DropDatabaseRequest{
@@ -134,7 +134,7 @@ func (d *DatabaseAdmin) DropDatabase(ctx context.Context, projectID, instanceID,
 	return err
 }
 
-// インスタンス一覧
+// データベース一覧
 func (d *DatabaseAdmin) Databases(ctx context.Context, projectID, instanceID string) ([]string, error) {
 	databaseIDs := []string{}
 	parent := fmt.Sprintf("projects/%s/instances/%s", projectID, instanceID)
@@ -171,7 +171,7 @@ func (d *DatabaseAdmin) CreateTable(ctx context.Context, projectID, instanceID, 
 }
 
 // テーブル削除
-// if not exists
+// if exists
 func (d *DatabaseAdmin) DropTable(ctx context.Context, projectID, instanceID, databaseID, name string) error {
 	op, err := d.client.UpdateDatabaseDdl(ctx, &databasepb.UpdateDatabaseDdlRequest{
 		Database:   fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID),
