@@ -1,18 +1,21 @@
 package spanner_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/ystkg/getting-started-examples/spanner"
 )
 
-func TestConnectDB(t *testing.T) {
+func TestConnectGorm(t *testing.T) {
 	const projectID = "local-spanner-20231030"
 	const instanceID = "instance1"
-	const databaseID = "database21"
+	const databaseID = "database31"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -41,13 +44,18 @@ func TestConnectDB(t *testing.T) {
 	}
 
 	dsn := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID)
-	client, err := spanner.NewSpannerDB(dsn)
+	db, err := spanner.NewSpannerGorm(dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer client.Close()
 
-	if err = client.Ping(ctx); err != nil {
+	sqlDb, err := db.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sqlDb.Close()
+
+	if err = sqlDb.PingContext(ctx); err != nil {
 		t.Fatal(err)
 	}
 
@@ -56,10 +64,10 @@ func TestConnectDB(t *testing.T) {
 	}
 }
 
-func TestCreateDeleteDB(t *testing.T) {
+func TestCreateDeleteGorm(t *testing.T) {
 	const projectID = "local-spanner-20231030"
 	const instanceID = "instance1"
-	const databaseID = "database22"
+	const databaseID = "database32"
 	const table = "Store"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -88,32 +96,40 @@ func TestCreateDeleteDB(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	if err = database.CreateTable(ctx, projectID, instanceID, databaseID, storeDdl); err != nil {
+		t.Fatal(err)
+	}
+
 	dsn := fmt.Sprintf("projects/%s/instances/%s/databases/%s", projectID, instanceID, databaseID)
-	client, err := spanner.NewSpannerDB(dsn)
+	db, err := spanner.NewSpannerGorm(dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer client.Close()
 
-	if _, err = client.ExecContext(ctx, storeDdl); err != nil {
-		t.Fatal(err)
-	}
-
-	tx, err := client.Begin(ctx)
+	sqlDb, err := db.DB()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer tx.Rollback()
+	defer sqlDb.Close()
 
-	if _, err = tx.ExecContext(ctx, storeDml); err != nil {
+	reader := csv.NewReader(bytes.NewReader(storeItems))
+	reader.Comma = '\t'
+	records, err := reader.ReadAll()
+	if err != nil {
 		t.Fatal(err)
 	}
-
-	if err = tx.Commit(); err != nil {
-		t.Fatal(err)
+	items := records[1:]
+	for _, v := range items {
+		storeId, err := strconv.Atoi(v[0])
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = db.Create(&Store{storeId, v[1]}).Error; err != nil {
+			t.Fatal(err)
+		}
 	}
 
-	if _, err = client.ExecContext(ctx, "DROP TABLE "+table); err != nil {
+	if err = database.DropTable(ctx, projectID, instanceID, databaseID, table); err != nil {
 		t.Fatal(err)
 	}
 
