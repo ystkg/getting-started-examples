@@ -27,8 +27,8 @@ type DockerCompose struct {
 
 // *spannerapi.Row.ToStruct(&store)
 type Store struct {
-	StoreID int    `spanner:"StoreId" gorm:"primaryKey;column:StoreId"`
-	Name    string `spanner:"Name"`
+	StoreID int64  `spanner:"StoreId" gorm:"primaryKey;column:StoreId"`
+	Name    string `spanner:"Name" gorm:"column:Name;size:100"`
 }
 
 var (

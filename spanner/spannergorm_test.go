@@ -120,7 +120,7 @@ func TestCreateDeleteGorm(t *testing.T) {
 	}
 	items := records[1:]
 	for _, v := range items {
-		storeId, err := strconv.Atoi(v[0])
+		storeId, err := strconv.ParseInt(v[0], 10, 64)
 		if err != nil {
 			t.Fatal(err)
 		}
