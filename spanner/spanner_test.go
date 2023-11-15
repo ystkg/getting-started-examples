@@ -27,7 +27,7 @@ type DockerCompose struct {
 
 // *spannerapi.Row.ToStruct(&store)
 type Store struct {
-	StoreID int    `spanner:"StoreId"`
+	StoreID int    `spanner:"StoreId" gorm:"primaryKey;column:StoreId"`
 	Name    string `spanner:"Name"`
 }
 
@@ -71,7 +71,7 @@ func setup() error {
 func TestConnect(t *testing.T) {
 	const projectID = "local-spanner-20231030"
 	const instanceID = "instance1"
-	const databaseID = "database1"
+	const databaseID = "database11"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -81,7 +81,7 @@ func TestConnect(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer instance.Close()
-	if err := instance.Create(ctx, projectID, instanceID); err != nil {
+	if err = instance.Create(ctx, projectID, instanceID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -90,7 +90,12 @@ func TestConnect(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer database.Close()
-	if err := database.CreateDatabase(ctx, projectID, instanceID, databaseID); err != nil {
+
+	if err = database.DropDatabase(ctx, projectID, instanceID, databaseID); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = database.CreateDatabase(ctx, projectID, instanceID, databaseID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -114,12 +119,16 @@ func TestConnect(t *testing.T) {
 	if got != want {
 		t.Errorf("%d, want %d", got, want)
 	}
+
+	if err = database.DropDatabase(ctx, projectID, instanceID, databaseID); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestCreateDelete(t *testing.T) {
 	const projectID = "local-spanner-20231030"
 	const instanceID = "instance1"
-	const databaseID = "database1"
+	const databaseID = "database12"
 	const table = "Store"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -139,11 +148,12 @@ func TestCreateDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer database.Close()
-	if err := database.CreateDatabase(ctx, projectID, instanceID, databaseID); err != nil {
+
+	if err = database.DropDatabase(ctx, projectID, instanceID, databaseID); err != nil {
 		t.Fatal(err)
 	}
 
-	if err = database.DropTable(ctx, projectID, instanceID, databaseID, table); err != nil {
+	if err = database.CreateDatabase(ctx, projectID, instanceID, databaseID); err != nil {
 		t.Fatal(err)
 	}
 
@@ -185,6 +195,10 @@ func TestCreateDelete(t *testing.T) {
 	}
 
 	if err = database.DropTable(ctx, projectID, instanceID, databaseID, table); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = database.DropDatabase(ctx, projectID, instanceID, databaseID); err != nil {
 		t.Fatal(err)
 	}
 }

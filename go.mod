@@ -4,17 +4,19 @@ go 1.21.4
 
 require (
 	cloud.google.com/go/bigquery v1.57.1
-	cloud.google.com/go/spanner v1.51.0
-	cloud.google.com/go/storage v1.34.1
+	cloud.google.com/go/spanner v1.51.1-0.20231030142734-7abc3595e9cc
+	cloud.google.com/go/storage v1.35.1
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/googleapis/go-sql-spanner v1.1.1
+	github.com/googleapis/go-gorm-spanner v0.0.0-20231110090820-e5c0b8387302
+	github.com/googleapis/go-sql-spanner v1.1.2-0.20231030143945-51f013b57cce
 	github.com/jackc/pgx/v5 v5.5.0
 	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.3.0
 	google.golang.org/api v0.150.0
 	google.golang.org/grpc v1.59.0
 	gopkg.in/yaml.v3 v3.0.1
+	gorm.io/gorm v1.25.5
 )
 
 require (
@@ -29,7 +31,7 @@ require (
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cncf/udpa/go v0.0.0-20220112060539-c52dc94e7fbe // indirect
-	github.com/cncf/xds/go v0.0.0-20231016030527-8bd2eac9fb4a // indirect
+	github.com/cncf/xds/go v0.0.0-20231109132714-523115ebc101 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/envoyproxy/go-control-plane v0.11.1 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.0.2 // indirect
@@ -45,6 +47,8 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/asmfmt v1.3.2 // indirect
 	github.com/klauspost/compress v1.17.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
@@ -54,15 +58,15 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.18 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
+	golang.org/x/crypto v0.15.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/oauth2 v0.13.0 // indirect
+	golang.org/x/net v0.18.0 // indirect
+	golang.org/x/oauth2 v0.14.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.4.0 // indirect
-	golang.org/x/tools v0.14.0 // indirect
+	golang.org/x/tools v0.15.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20231106174013-bbf56f31fb17 // indirect
