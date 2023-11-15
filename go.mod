@@ -4,7 +4,7 @@ go 1.21.4
 
 require (
 	cloud.google.com/go/bigquery v1.57.1
-	cloud.google.com/go/spanner v1.51.1-0.20231030142734-7abc3595e9cc
+	cloud.google.com/go/spanner v1.53.0
 	cloud.google.com/go/storage v1.35.1
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/go-sql-driver/mysql v1.7.1
@@ -50,7 +50,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/asmfmt v1.3.2 // indirect
-	github.com/klauspost/compress v1.17.2 // indirect
+	github.com/klauspost/compress v1.17.3 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8 // indirect
