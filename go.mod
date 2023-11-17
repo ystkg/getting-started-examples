@@ -13,7 +13,7 @@ require (
 	github.com/jackc/pgx/v5 v5.5.0
 	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.3.0
-	google.golang.org/api v0.150.0
+	google.golang.org/api v0.151.0
 	google.golang.org/grpc v1.59.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/gorm v1.25.5
@@ -31,7 +31,7 @@ require (
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cncf/udpa/go v0.0.0-20220112060539-c52dc94e7fbe // indirect
-	github.com/cncf/xds/go v0.0.0-20231109132714-523115ebc101 // indirect
+	github.com/cncf/xds/go v0.0.0-20231116142803-3a472e524827 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/envoyproxy/go-control-plane v0.11.1 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.0.2 // indirect
