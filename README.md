@@ -9,26 +9,6 @@
 | Memcached | memcached | 11211 | github.com/<br>bradfitz/gomemcache/memcache |
 | Cloud Storage | fsouza/fake-gcs-server | 4443 | cloud.google.com/go/storage |
 
-## データウェアハウス
-
-### BigQuery
-
-#### データセット
-
-| 操作 | レシーバー | メソッド | パラメータ |
-| --- | --- | --- | --- |
-| 作成 | BigQuery | CreateDataset | datasetID |
-| 削除 | BigQuery | DeleteDataset | datasetID |
-| 一覧 | BigQuery | Datasets | |
-
-#### テーブル
-
-| 操作 | レシーバー | メソッド | パラメータ |
-| --- | --- | --- | --- |
-| 作成 | BigQuery | CreateTable | datasetID, tableID, schema |
-| 削除 | BigQuery | DeleteTable | datasetID, tableID |
-| 一覧 | BigQuery | Tables      | datasetID |
-
 ## オブジェクトストレージ
 
 ### Cloud Storage
@@ -51,31 +31,3 @@
 | 削除     | Gcs | Delete | bucket, name |
 | 存在確認 | Gcs | Exists | bucket, name |
 | 一覧     | Gcs | List   | bucket, prefix |
-
-## NewSQL
-
-### Cloud Spanner
-
-#### インスタンス
-
-| 操作 | レシーバー | メソッド | パラメータ |
-| --- | --- | --- | --- |
-| 作成 | InstanceAdmin | Create    | projectID, instanceID |
-| 削除 | InstanceAdmin | Delete    | projectID, instanceID |
-| 一覧 | InstanceAdmin | Instances | projectID |
-
-#### データベース
-
-| 操作 | レシーバー | メソッド | パラメータ |
-| --- | --- | --- | --- |
-| 作成 | DatabaseAdmin | CreateDatabase | projectID, instanceID, databaseID |
-| 削除 | DatabaseAdmin | DropDatabase   | projectID, instanceID, databaseID |
-| 一覧 | DatabaseAdmin | Databases      | projectID, instanceID |
-
-#### テーブル
-
-| 操作 | レシーバー | メソッド | パラメータ |
-| --- | --- | --- | --- |
-| 作成 | DatabaseAdmin | CreateTable | projectID, instanceID, databaseID, ddl |
-| 削除 | DatabaseAdmin | DropTable   | projectID, instanceID, databaseID, name |
-| 一覧 | Spanner       | Tables      | |

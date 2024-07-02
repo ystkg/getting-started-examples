@@ -36,21 +36,9 @@ services:
     restart: always
     ports:
       - 11211:11211
-  bigquery:
-    image: ghcr.io/goccy/bigquery-emulator
-    restart: always
-    ports:
-      - 9050:9050
-    command: "bigquery-emulator --project=local-bigquery --dataset=dataset1"
   gcs:
     image: fsouza/fake-gcs-server
     restart: always
     ports:
       - 4443:4443
     command: "-scheme http -public-host localhost"
-  spanner:
-    image: gcr.io/cloud-spanner-emulator/emulator
-    restart: always
-    ports:
-      - 9010:9010
-      - 9020:9020
