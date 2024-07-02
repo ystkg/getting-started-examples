@@ -1,4 +1,0 @@
-CREATE TABLE IF NOT EXISTS Store (
-    StoreId INT64 NOT NULL,
-    Name STRING(100)
-) PRIMARY KEY (StoreId)
