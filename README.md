@@ -6,7 +6,7 @@
 | MySQL | mysql | 3306 | github.com/go-sql-driver/mysql |
 | MariaDB | mariadb | 3307 | github.com/go-sql-driver/mysql |
 | Redis | redis | 6379 | github.com/redis/go-redis/v9 |
-| Memcached | memcached | 11211 | github.com/<br>bradfitz/gomemcache/memcache |
+| Memcached | memcached | 11211 | github.com/bradfitz/gomemcache/memcache |
 | Cloud Storage | fsouza/fake-gcs-server | 4443 | cloud.google.com/go/storage |
 
 ## オブジェクトストレージ
